@@ -10,7 +10,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,7 @@ public class NewsService {
 
     public Page<Summary> getSummaries(Pageable pageable) throws InterruptedException {
         String query = String.format(
-                "SELECT created_at, summary1, summary2, summary3, impact, bitcoin_price FROM `%s.%s.summaries` ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                "SELECT timestamp, summary1_jp, summary2_jp, summary3_jp, impact, bitcoin_price FROM `%s.%s.summaries` ORDER BY timestamp DESC LIMIT %d OFFSET %d",
                 PROJECT_ID, DATASET_ID, pageable.getPageSize(), pageable.getOffset()
         );
         return executeSummaryQuery(query, pageable);
@@ -37,7 +39,7 @@ public class NewsService {
 
     public Page<Translation> getTranslations(Pageable pageable) throws InterruptedException {
         String query = String.format(
-                "SELECT created_at, source_url, translated_title, translated_article, original_article, impact_level FROM `%s.%s.translation` ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                "SELECT timestamp, url, title_jp, summary_jp, impact FROM `%s.%s.translation` ORDER BY timestamp DESC LIMIT %d OFFSET %d",
                 PROJECT_ID, DATASET_ID, pageable.getPageSize(), pageable.getOffset()
         );
         return executeTranslationQuery(query, pageable);
@@ -49,14 +51,14 @@ public class NewsService {
 
         List<Summary> summaries = new ArrayList<>();
         result.iterateAll().forEach(row -> {
-            LocalDateTime createdAt = LocalDateTime.parse(row.get("created_at").getStringValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(row.get("timestamp").getTimestampValue() / 1000), ZoneOffset.UTC);
             summaries.add(new Summary(
-                    createdAt,
-                    row.get("summary1").getStringValue(),
-                    row.get("summary2").getStringValue(),
-                    row.get("summary3").getStringValue(),
-                    row.get("impact").getStringValue(),
-                    row.get("bitcoin_price").getDoubleValue()
+                    timestamp,
+                    row.get("summary1_jp").getStringValue(),
+                    row.get("summary2_jp").getStringValue(),
+                    row.get("summary3_jp").getStringValue(),
+                    row.get("impact").getLongValue(),
+                    row.get("bitcoin_price").getStringValue()
             ));
         });
 
@@ -71,14 +73,13 @@ public class NewsService {
 
         List<Translation> translations = new ArrayList<>();
         result.iterateAll().forEach(row -> {
-            LocalDateTime createdAt = LocalDateTime.parse(row.get("created_at").getStringValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            LocalDateTime timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(row.get("timestamp").getTimestampValue() / 1000), ZoneOffset.UTC);
             translations.add(new Translation(
-                    createdAt,
-                    row.get("source_url").getStringValue(),
-                    row.get("translated_title").getStringValue(),
-                    row.get("translated_article").getStringValue(),
-                    row.get("original_article").getStringValue(),
-                    row.get("impact_level").getStringValue()
+                    timestamp,
+                    row.get("url").getStringValue(),
+                    row.get("title_jp").getStringValue(),
+                    row.get("summary_jp").getStringValue(),
+                    row.get("impact").getLongValue()
             ));
         });
         return new PageImpl<>(translations, pageable, translations.size());

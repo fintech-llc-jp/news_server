@@ -8,7 +8,7 @@ This Spring Boot application provides API endpoints to query news summaries and 
 
 `GET /api/news/summaries`
 
-Returns a paginated list of news summaries, sorted by `created_at` in descending order.
+Returns a paginated list of news summaries, sorted by `timestamp` in descending order.
 
 #### Query Parameters:
 
@@ -27,12 +27,12 @@ GET /api/news/summaries?page=0&size=5
 {
   "content": [
     {
-      "created_at": "2025-07-08T10:00:00",
-      "summary1": "Summary text 1",
-      "summary2": "Summary text 2",
-      "summary3": "Summary text 3",
-      "impact": "High",
-      "bitcoin_price": 65000.0
+      "timestamp": "2025-07-08T10:00:00Z",
+      "summary1_jp": "要約テキスト1",
+      "summary2_jp": "要約テキスト2",
+      "summary3_jp": "要約テキスト3",
+      "impact": 100,
+      "bitcoin_price": "65000.0"
     }
     // ... more summaries
   ],
@@ -68,7 +68,7 @@ GET /api/news/summaries?page=0&size=5
 
 `GET /api/news/translations`
 
-Returns a paginated list of news translations, sorted by `created_at` in descending order.
+Returns a paginated list of news translations, sorted by `timestamp` in descending order.
 
 #### Query Parameters:
 
@@ -87,12 +87,11 @@ GET /api/news/translations?page=0&size=5
 {
   "content": [
     {
-      "created_at": "2025-07-08T10:00:00",
-      "source_url": "https://example.com/news/123",
-      "translated_title": "Translated News Title",
-      "translated_article": "Translated article content...",
-      "original_article": "Original article content...",
-      "impact_level": "Medium"
+      "timestamp": "2025-07-08T10:00:00Z",
+      "url": "https://example.com/news/123",
+      "title_jp": "ニュースタイトル日本語",
+      "summary_jp": "要約された記事の内容...",
+      "impact": 50
     }
     // ... more translations
   ],
